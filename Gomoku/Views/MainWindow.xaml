@@ -1,0 +1,1391 @@
+﻿<Window x:Name="GomokuWindow" x:Class="Gomoku.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        xmlns:local="clr-namespace:Gomoku.ViewModels"
+        Title="Gomoku - Five in a row" SizeToContent="WidthAndHeight" MinWidth="1000" MinHeight="670" WindowStartupLocation="CenterScreen" KeyDown="GomokuWindow_KeyDown" Icon="Gomoku.ico">
+   
+    <Window.Resources>
+        <local:MessageViewModel x:Key="Message"/>
+    </Window.Resources>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        <Menu Background="#FF337AB7" Foreground="White" Grid.Row="0">
+            <MenuItem x:Name="menuFile" Header="File" MouseMove="menuFile_MouseMove" >
+                <MenuItem x:Name="menuNewGame" Foreground="Black" Header="New Game (Ctrl + N)" Click="menuNewGame_Click">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/NewGame.ico" />
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="menuSaveGame" Foreground="Black" Header="Save Game (Ctrl + S)" Click="menuSaveGame_Click">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/SaveGame.ico" />
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="menuLoadGame" Foreground="Black" Header="Load Game (Ctrl + L)" Click="menuLoadGame_Click">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/LoadGame.ico" />
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="menuExit" Foreground="Black" Header="Exit" Click="menuExit_Click">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/Exit.ico" />
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem x:Name="menuEdit" Header="Edit" MouseMove="menuEdit_MouseMove" >
+                <MenuItem x:Name="menuMatchMode" Foreground="Black" Header="_Match Mode">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/MatchMode.ico" />
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                    <MenuItem x:Name="menuPvP" Foreground="Black" Header="Friendly Match" Click="menuPvP_Click">
+                        <MenuItem.Icon>
+                            <Image>
+                                <Image.Source>
+                                    <BitmapImage UriSource="Resources/PvP.ico" />
+                                </Image.Source>
+                            </Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                    <MenuItem x:Name="menuPvC" Foreground="Black" Header="Challenge Match" Click="menuPvC_Click">
+                        <MenuItem.Icon>
+                            <Image>
+                                <Image.Source>
+                                    <BitmapImage UriSource="Resources/PvC.ico" />
+                                </Image.Source>
+                            </Image>
+                        </MenuItem.Icon>
+                    </MenuItem>
+                </MenuItem>
+                <MenuItem x:Name="menuUndo" Foreground="Black" Header="Undo (Ctrl + Z)" Click="menuUndo_Click">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/Undo.ico"/>
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem x:Name="menuRedo" Foreground="Black" Header="Redo (Ctrl + Y)" Click="menuRedo_Click">
+                    <MenuItem.Icon>
+                        <Image>
+                            <Image.Source>
+                                <BitmapImage UriSource="Resources/Redo.ico" />
+                            </Image.Source>
+                        </Image>
+                    </MenuItem.Icon>
+                </MenuItem>
+            </MenuItem>
+        </Menu>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" BorderBrush="Black" BorderThickness="2" Margin="10, 10, 0, 10">
+                    <Grid Grid.Row="0" x:Name="board" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                        <Grid.Background>
+                            <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Grid.Background>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Row="0" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Click="Cell_Click">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0.007"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0.007"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0.007"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0.007"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0.007"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="0" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0.007"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="1" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="2" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="2" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="3" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="3" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFFDFDFD" Offset="0"/>
+                                    <GradientStop Color="#FFEEEEEE" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="4" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="4" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="5" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="5" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="6" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="6" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="7" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="7" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0.01"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="8" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="8" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="9" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="9" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="10" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="10" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+
+                        <Button Grid.Row="11" Grid.Column="0" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="1" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="2" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="3" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="4" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="5" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="6" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="7" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="8" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="9" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="10" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Gainsboro" Offset="0"/>
+                                    <GradientStop Color="#CCC" Offset="1"/>
+                                </RadialGradientBrush>
+                            </Button.Background>
+                        </Button>
+                        <Button Grid.Row="11" Grid.Column="11" MinWidth="42" MinHeight="42" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                            <Button.Background>
+                                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                                    <GradientStop Color="#FFEEEEEE" Offset="0"/>
+                                    <GradientStop Color="#FFFDFDFD" Offset="1"/>
+                                </LinearGradientBrush>
+                            </Button.Background>
+                        </Button>
+                    </Grid>
+                </Border>
+                <Grid Background="#FF337AB7" Grid.Row="1" Margin="90,0,80,5">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Button Grid.Column="0" x:Name="btnPvP" Margin="10,10,10,10" Content="J" FontFamily="Wingdings" Style="{DynamicResource HoverButton}" FontSize="32" Foreground="White" ToolTip="Friendly Match" Click="btnPvP_Click"/>
+                    <TextBlock Foreground="White" FontWeight="Bold" Grid.Column="1" FontSize="17" TextAlignment="Center">MATCH MODE</TextBlock>
+                    <Button Grid.Column="2" x:Name="btnPvC" Margin="10,10,10,10" Content="%" FontFamily="Webdings" Style="{DynamicResource HoverButton}" FontSize="32" Foreground="White" ToolTip="Challenge Match" Click="btnPvC_Click"/>
+                </Grid>
+            </Grid>
+
+            <Grid x:Name="chatOnline" Grid.Column="1"  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20, 10, 10, 0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <Grid x:Name="changeName" Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" x:Name="lblYourName" Content="Your name:" FontSize="14" FontWeight="Bold"/>
+                    <TextBox Grid.Column="1" Width="200" Height="30" HorizontalAlignment="Left" FontSize="14" Padding="0, 5, 0, 0" BorderBrush="#FF838383" BorderThickness="2" x:Name="txtYourName" Text="Guest"/>
+                    <Button Grid.Column="2" x:Name="btnChange" Content="Change!" HorizontalAlignment="Left" Width="100" Height="30" Margin="2, 0, 0, 0" FontSize="14" Cursor="Hand" Click="btnChange_Click"/>
+                </Grid>
+                <Grid x:Name="chatMessage" Grid.Row="1" Margin="0, 20, 0, 0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Width="30" Height="30" HorizontalAlignment="Left">
+                            <Label.Background>
+                                <ImageBrush ImageSource="Resources/Moodle.png"/>
+                            </Label.Background>
+                        </Label>
+                        <Label x:Name="lblMessage" Grid.Column="1" Height="30" Width="400" HorizontalAlignment="Left" Background="#FF337AB7" Content="Chat/History" Foreground="White" FontSize="14"/>
+                    </Grid>
+                    <Border Grid.Row="1" Width="430" BorderBrush="#FF337AB7" BorderThickness="2" HorizontalAlignment="Left">
+                        <Grid VerticalAlignment="Top">
+                            <Grid.RowDefinitions>
+                                <RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <ListBox Grid.Row="0" x:Name="chatBox" Width="426" Height="350" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2, 0, 0, 0" BorderBrush="{x:Null}"/>
+                            <Grid DataContext="{StaticResource Message}" Grid.Row="1" VerticalAlignment="Bottom" Background="WhiteSmoke">
+                                <Grid HorizontalAlignment="Left">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Text="{Binding Message.Text, UpdateSourceTrigger=PropertyChanged}" Grid.Column="0" x:Name="txtMessage" Width="200" Height="30" FontSize="14" Margin="10, 10, 0, 10" Foreground="#FF878787" GotFocus="txtMessage_GotFocus" LostFocus="txtMessage_LostFocus" KeyDown="txtMessage_KeyDown"/>
+                                    <Button Command="{Binding SendCommand}" Grid.Column="1" x:Name="btnSend" Width="70" Height="30" FontSize="16" Content="Send" HorizontalAlignment="Left" Background="#FFF0AD4E" FontWeight="Bold" Foreground="White" Cursor="Hand" Click="btnSend_Click"/>
+                                </Grid>
+                            </Grid>
+                        </Grid>
+                    </Border>
+                </Grid>
+                <GroupBox Header="ONLINE" Foreground="#FF337AB7" Grid.Row="2" Width="110" FontWeight="Bold" BorderBrush="#FF337AB7">
+                    <ToggleButton x:Name="btnOnline" Style="{DynamicResource ToggleButtonStyle}" Click="btnOnline_Click"/>
+                </GroupBox>
+            </Grid>
+        </Grid>
+    </Grid>
+    
+</Window>
